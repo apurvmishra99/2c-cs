@@ -1,3 +1,0 @@
-/home/apurv/CLionProjects/2C-CS-CW1/cmake-build-debug/CMakeFiles/rebuild_cache.dir
-/home/apurv/CLionProjects/2C-CS-CW1/cmake-build-debug/CMakeFiles/2C_CS_CW1.dir
-/home/apurv/CLionProjects/2C-CS-CW1/cmake-build-debug/CMakeFiles/edit_cache.dir
