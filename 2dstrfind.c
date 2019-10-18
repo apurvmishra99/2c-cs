@@ -103,20 +103,12 @@ int lenRows(char *string) {
     return len;
 }
 
-int containCol(char *string, char *word) {
-    int len_row = lenRows(string);
-//    for (; string < stringlen(string); string += len_row) {
-//        if (*string != *word) {
-//            return (*word == '\n');
-//        }
-//        word++;
-//    }
+int containCol(char *string, char *word, int len_row) {
     while (1) {
         if (*string != *word) {
             return (*word == '\n');
         }
-
-        string += len_row;
+        string = string + len_row + 1;
         word++;
     }
 
@@ -149,23 +141,15 @@ void strfind() {
     int grid_idx = 0;
     int rowCount = 0;
     char *word;
+    int len_row = lenRows(grid);
     while (grid[grid_idx] != '\0') {
         if (grid[grid_idx] == '\n') {
             ++rowCount;
         }
         for (idx = 0; idx < dict_num_words; idx++) {
             word = dictionary + dictionary_idx[idx];
-            if (contain(grid + grid_idx, word)) {
-                print_int(rowCount);
-                print_char(',');
-                print_int(grid_idx);
-                print_char(' ');
-                print_char(72);
-                print_char(' ');
-                print_word(word);
-                print_char('\n');
-            }
-            if (containCol(grid + grid_idx, word)) {
+            if (containCol(grid + grid_idx, word, len_row))
+            {
                 print_int(rowCount);
                 print_char(',');
                 print_int(grid_idx);
@@ -182,33 +166,33 @@ void strfind() {
     print_string("-1\n");
 }
 
-void strcolfind() {
-    int idx = 0;
-    int grid_idx = 0;
-    int rowCount = 0;
-    char *word;
-    while (grid[grid_idx] != '\0') {
-        if (grid[grid_idx] == '\n') {
-            ++rowCount;
-        }
-        for (idx = 0; idx < dict_num_words; idx++) {
-            word = dictionary + dictionary_idx[idx];
-            if (containCol(grid + grid_idx, word)) {
-                print_int(rowCount);
-                print_char(',');
-                print_int(grid_idx);
-                print_char(' ');
-                print_char(86);
-                print_char(' ');
-                print_word(word);
-                print_char('\n');
-            }
-        }
-        grid_idx++;
-        if (stringlen(grid) == grid_idx) return;
-    }
-    print_string("-1\n");
-}
+// void strcolfind() {
+//     int idx = 0;
+//     int grid_idx = 0;
+//     int rowCount = 0;
+//     char *word;
+//     while (grid[grid_idx] != '\0') {
+//         if (grid[grid_idx] == '\n') {
+//             ++rowCount;
+//         }
+//         for (idx = 0; idx < dict_num_words; idx++) {
+//             word = dictionary + dictionary_idx[idx];
+//             if (containCol(grid + grid_idx, word)) {
+//                 print_int(rowCount);
+//                 print_char(',');
+//                 print_int(grid_idx);
+//                 print_char(' ');
+//                 print_char(86);
+//                 print_char(' ');
+//                 print_word(word);
+//                 print_char('\n');
+//             }
+//         }
+//         grid_idx++;
+//         if (stringlen(grid) == grid_idx) return;
+//     }
+//     print_string("-1\n");
+// }
 
 
 //---------------------------------------------------------------------------
@@ -291,7 +275,7 @@ int main(void) {
 
     dict_num_words = dict_idx;
 
-    strcolfind();
+    // strcolfind();
     strfind();
 
     return 0;
