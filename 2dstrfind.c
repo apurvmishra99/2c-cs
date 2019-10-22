@@ -74,6 +74,10 @@ void print_word(char *word) {
 // function to see if the string contains the (\n terminated) word
 int contain(char *string, char *word) {
     while (1) {
+        if (*string == '\n') {
+            string++;
+            continue;
+        }
         if (*string != *word) {
             return (*word == '\n');
         }
@@ -109,6 +113,21 @@ int containCol(char *string, char *word, int len_row) {
             return (*word == '\n');
         }
         string = string + len_row + 1;
+        word++;
+    }
+
+    return 0;
+}
+
+int containDiag(char *string, char *word, int len_row)
+{
+    while (1)
+    {
+        if (*string != *word)
+        {
+            return (*word == '\n');
+        }
+        string = string + len_row + 2;
         word++;
     }
 
@@ -159,41 +178,34 @@ void strfind() {
                 print_word(word);
                 print_char('\n');
             }
+            if (containDiag(grid + grid_idx, word, len_row))
+            {
+                print_int(rowCount);
+                print_char(',');
+                print_int(grid_idx-(len_row +1));
+                print_char(' ');
+                print_char(68);
+                print_char(' ');
+                print_word(word);
+                print_char('\n');
+            }
+            if (contain(grid + grid_idx, word))
+            {
+                print_int(rowCount);
+                print_char(',');
+                print_int(grid_idx);
+                print_char(' ');
+                print_char(72);
+                print_char(' ');
+                print_word(word);
+                print_char('\n');
+            }
         }
         grid_idx++;
         if (stringlen(grid) == grid_idx) return;
     }
     print_string("-1\n");
 }
-
-// void strcolfind() {
-//     int idx = 0;
-//     int grid_idx = 0;
-//     int rowCount = 0;
-//     char *word;
-//     while (grid[grid_idx] != '\0') {
-//         if (grid[grid_idx] == '\n') {
-//             ++rowCount;
-//         }
-//         for (idx = 0; idx < dict_num_words; idx++) {
-//             word = dictionary + dictionary_idx[idx];
-//             if (containCol(grid + grid_idx, word)) {
-//                 print_int(rowCount);
-//                 print_char(',');
-//                 print_int(grid_idx);
-//                 print_char(' ');
-//                 print_char(86);
-//                 print_char(' ');
-//                 print_word(word);
-//                 print_char('\n');
-//             }
-//         }
-//         grid_idx++;
-//         if (stringlen(grid) == grid_idx) return;
-//     }
-//     print_string("-1\n");
-// }
-
 
 //---------------------------------------------------------------------------
 // MAIN function

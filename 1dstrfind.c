@@ -100,8 +100,14 @@ void strfind()
   char *word;
   while (grid[grid_idx] != '\0') {
     for(idx = 0; idx < dict_num_words; idx ++) {
-      word = dictionary + dictionary_idx[idx]; 
-      if (contain(grid + grid_idx, word)) {
+      word = dictionary + dictionary_idx[idx];
+      print_string(dictionary);
+      print_int(dictionary_idx[idx]);
+      print_char('\n');
+      print_int(dictionary_idx[idx] + dictionary);
+      print_char('\n');
+
+        if (contain(grid + grid_idx, word)) {
         print_int(grid_idx);
         print_char(' ');
         print_word(word);
