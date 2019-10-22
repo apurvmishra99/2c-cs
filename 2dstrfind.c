@@ -171,7 +171,7 @@ void strfind() {
             {
                 print_int(rowCount);
                 print_char(',');
-                print_int(grid_idx);
+                print_int(grid_idx % (len_row + 1));
                 print_char(' ');
                 print_char(86);
                 print_char(' ');
@@ -182,7 +182,7 @@ void strfind() {
             {
                 print_int(rowCount);
                 print_char(',');
-                print_int(grid_idx-(len_row +1));
+                print_int(grid_idx % (len_row +1));
                 print_char(' ');
                 print_char(68);
                 print_char(' ');
@@ -193,7 +193,7 @@ void strfind() {
             {
                 print_int(rowCount);
                 print_char(',');
-                print_int(grid_idx);
+                print_int(grid_idx % (len_row+1));
                 print_char(' ');
                 print_char(72);
                 print_char(' ');

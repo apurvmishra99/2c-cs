@@ -229,7 +229,7 @@ void strfind() {
     char *word;
     int len_cols = countrows(grid);
     int len_row = lenRows(grid);
-    printf("row:%d, col:%d\n", len_row, len_cols);
+
     while (grid[grid_idx] != '\0') {
         if (grid[grid_idx] == '\n') {
             ++rowCount;
@@ -353,8 +353,6 @@ int main(void) {
     } while (1);
 
     dict_num_words = dict_idx;
-
-    // strcolfind();
     strfind();
 
     return 0;
