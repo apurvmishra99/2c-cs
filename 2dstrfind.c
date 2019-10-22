@@ -31,7 +31,8 @@
 
 int read_char() { return getchar(); }
 
-int read_int() {
+int read_int()
+{
     int i;
     scanf("%i", &i);
     return i;
@@ -52,9 +53,9 @@ const char dictionary_file_name[] = "dictionary.txt";
 // grid file name
 const char grid_file_name[] = "2dgrid.txt";
 // content of grid file
-char grid[(MAX_DIM_SIZE + 1 /* for \n */ ) * MAX_DIM_SIZE + 1 /* for \0 */ ];
+char grid[(MAX_DIM_SIZE + 1 /* for \n */) * MAX_DIM_SIZE + 1 /* for \0 */];
 // content of dictionary file
-char dictionary[MAX_DICTIONARY_WORDS * (MAX_WORD_SIZE + 1 /* for \n */ ) + 1 /* for \0 */ ];
+char dictionary[MAX_DICTIONARY_WORDS * (MAX_WORD_SIZE + 1 /* for \n */) + 1 /* for \0 */];
 ///////////////////////////////////////////////////////////////////////////////
 /////////////// Do not modify anything above
 ///////////////Put your global variables/functions here///////////////////////
@@ -62,67 +63,91 @@ int dictionary_idx[MAX_DICTIONARY_WORDS];
 // number of words in the dictionary
 int dict_num_words = 0;
 
-
 // function to print found word
-void print_word(char *word) {
-    while (*word != '\n' && *word != '\0') {
+void print_word(char *word)
+{
+    while (*word != '\n' && *word != '\0')
+    {
         print_char(*word);
         word++;
     }
 }
+int lenRows(char *string)
+{
+    int len = 0;
+    while (*string != '\n')
+    {
+        len++;
+        string++;
+    }
+    return len;
+}
+
+int countrows(char *string)
+{
+    int count = 0;
+    while (*string != '\0')
+    {
+        if (*string == '\n')
+        {
+            count++;
+        }
+        string++;
+    }
+    return count;
+}
 
 // function to see if the string contains the (\n terminated) word
-int contain(char *string, char *word) {
-    while (1) {
-        if (*string == '\n' && *word != '\n') {
+int containHor(char *string, char *word)
+{
+    while (1)
+    {
+        if (*word == '\n')
+        {
+            return 1;
+        }
+        else if (*string == '\n')
+        {
             return 0;
         }
-        if (*string != *word) {
-            return (*word == '\n');
+        else if (*string != *word)
+        {
+            return 0;
         }
-
-        string++;
-        word++;
+        else
+        {
+            string++;
+            word++;
+        }
     }
 
     return 0;
 }
 
-int stringlen(char *string) {
-    int len = 0;
-    while (*string != '\0') {
-        len++;
-        string++;
-    }
-    return len;
-}
+int containCol(char *string, char *word, int len_row, int len_cols)
+{
+    while (1)
+    {
+        int grid_idx = string - grid;
+        int x = grid_idx / (len_row + 1);
 
-int lenRows(char *string) {
-    int len = 0;
-    while (*string != '\n') {
-        len++;
-        string++;
-    }
-    return len;
-}
-
-int containCol(char *string, char *word, int len_row, int len_cols) {
-    while (1) {
-        int pos = string -grid;
-        int x = pos / (len_row+1) ;
-        int y = pos % (len_row+1) ;
-
-        if (*word == '\n') {
+        if (*word == '\n')
+        {
             return 1;
         }
-        if (*string == '\n' || *string != *word) {
+        else if (*string == '\n' || x == len_cols)
+        {
             return 0;
         }
-        if (x == len_cols) {
+        else if (*string != *word)
+        {
             return 0;
         }
-        string = string + len_row + 1;
-        word++;
+        else
+        {
+            string += len_row + 1;
+            word++;
+        }
     }
 
     return 0;
@@ -132,47 +157,34 @@ int containDiag(char *string, char *word, int len_row, int len_cols)
 {
     while (1)
     {
-        int pos = string -grid;
-        int x = pos / (len_row+1) ;
-        int y = pos % (len_row+1) ;
-        if (*word == '\n') {
+        int grid_idx = string - grid;
+        int x = grid_idx / (len_row + 1);
+
+        if (*word == '\n')
+        {
             return 1;
         }
-        if (*string == '\n' || *string != *word) {
+        else if (*string == '\n' || x == len_cols)
+        {
             return 0;
         }
-        if (x == len_cols) {
+        else if (*string != *word)
+        {
             return 0;
         }
-        string = string + len_row + 2;
-        word++;
+        else
+        {
+            string += len_row + 2;
+            word++;
+        }
     }
 
     return 0;
 }
 
-int countrows(char *string) {
-    int count = 0;
-    while (*string != '\0') {
-        if (*string == '\n') {
-            count++;
-        }
-        string++;
-    }
-    return count;
-}
-
-int wordlen(char *string) {
-    int len = 0;
-    while (*string != '\n') {
-        len++;
-        string++;
-    }
-    return len;
-}
-
 // this functions finds the first match in the grid
-void strfind() {
+void strfind()
+{
     int idx = 0;
     int grid_idx = 0;
     int rowCount = 0;
@@ -181,11 +193,14 @@ void strfind() {
     int len_cols = countrows(grid);
     int found = 0;
 
-    while (grid[grid_idx] != '\0') {
-        if (grid[grid_idx] == '\n') {
+    while (grid[grid_idx] != '\0')
+    {
+        if (grid[grid_idx] == '\n')
+        {
             ++rowCount;
         }
-        for (idx = 0; idx < dict_num_words; idx++) {
+        for (idx = 0; idx < dict_num_words; idx++)
+        {
             word = dictionary + dictionary_idx[idx];
             if (containCol(grid + grid_idx, word, len_row, len_cols))
             {
@@ -197,47 +212,47 @@ void strfind() {
                 print_char(' ');
                 print_word(word);
                 print_char('\n');
-                found +=1;
-
+                found += 1;
             }
             if (containDiag(grid + grid_idx, word, len_row, len_cols))
             {
                 print_int(rowCount);
                 print_char(',');
-                print_int(grid_idx % (len_row +1));
+                print_int(grid_idx % (len_row + 1));
                 print_char(' ');
                 print_char(68);
                 print_char(' ');
                 print_word(word);
                 print_char('\n');
-                found +=1;
+                found += 1;
             }
-            if (contain(grid + grid_idx, word))
+            if (containHor(grid + grid_idx, word))
             {
                 print_int(rowCount);
                 print_char(',');
-                print_int(grid_idx % (len_row+1));
+                print_int(grid_idx % (len_row + 1));
                 print_char(' ');
                 print_char(72);
                 print_char(' ');
                 print_word(word);
                 print_char('\n');
-                found +=1;
+                found += 1;
             }
         }
         grid_idx++;
     }
-    if (found == 0) {
+    if (found == 0)
+    {
         print_string("-1\n");
     }
-    
 }
 
 //---------------------------------------------------------------------------
 // MAIN function
 //---------------------------------------------------------------------------
 
-int main(void) {
+int main(void)
+{
 
     int dict_idx = 0;
     int start_idx = 0;
@@ -247,28 +262,31 @@ int main(void) {
     int c_input;
     int idx = 0;
 
-
     // open grid file
     FILE *grid_file = fopen(grid_file_name, "r");
     // open dictionary file
     FILE *dictionary_file = fopen(dictionary_file_name, "r");
 
     // if opening the grid file failed
-    if (grid_file == NULL) {
+    if (grid_file == NULL)
+    {
         print_string("Error in opening grid file.\n");
         return -1;
     }
 
     // if opening the dictionary file failed
-    if (dictionary_file == NULL) {
+    if (dictionary_file == NULL)
+    {
         print_string("Error in opening dictionary file.\n");
         return -1;
     }
     // reading the grid file
-    do {
+    do
+    {
         c_input = fgetc(grid_file);
         // indicates the the of file
-        if (feof(grid_file)) {
+        if (feof(grid_file))
+        {
             grid[idx] = '\0';
             break;
         }
@@ -282,10 +300,12 @@ int main(void) {
     idx = 0;
 
     // reading the dictionary file
-    do {
+    do
+    {
         c_input = fgetc(dictionary_file);
         // indicates the end of file
-        if (feof(dictionary_file)) {
+        if (feof(dictionary_file))
+        {
             dictionary[idx] = '\0';
             break;
         }
@@ -293,18 +313,20 @@ int main(void) {
         idx += 1;
     } while (1);
 
-
     // closing the dictionary file
     fclose(dictionary_file);
     //////////////////////////End of reading////////////////////////
     ///////////////You can add your code here!//////////////////////
     idx = 0;
-    do {
+    do
+    {
         c_input = dictionary[idx];
-        if (c_input == '\0') {
+        if (c_input == '\0')
+        {
             break;
         }
-        if (c_input == '\n') {
+        if (c_input == '\n')
+        {
             dictionary_idx[dict_idx++] = start_idx;
             start_idx = idx + 1;
         }

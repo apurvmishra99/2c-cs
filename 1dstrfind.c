@@ -118,7 +118,8 @@ void strfind()
     }
     grid_idx++;
   }
-  if (found == 0) {
+  if (found == 0)
+  {
     print_string("-1\n");
   }
 }
