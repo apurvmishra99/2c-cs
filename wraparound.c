@@ -198,18 +198,21 @@ int containDiagWrap(char *string, char *word, int len_row, int len_cols) {
         int pos_string = string - grid;
         int x = pos_string / (len_row+1);
         int y = pos_string % (len_row+1);
-
-        if (*string != *word) 
-        { 
-            return (*word == '\n'); 
+        
+        if (*word == '\n') {
+            return 1;
         }
-        else if (x == len_cols || y == len_row ) {
+        
+        if (x == len_cols || y == len_row ) {
             if (*(++word) == '\n') {
                 return 1;
             }
             string -= (x * (len_row + 2));
         }
-
+        else if (*string != *word) 
+        { 
+            return (*word == '\n'); 
+        } 
         else 
         {
             string = string + len_row + 2;
@@ -229,6 +232,7 @@ void strfind() {
     char *word;
     int len_cols = countrows(grid);
     int len_row = lenRows(grid);
+    int found = 0;
 
     while (grid[grid_idx] != '\0') {
         if (grid[grid_idx] == '\n') {
@@ -245,6 +249,7 @@ void strfind() {
                 print_char(' '); 
                 print_word(word);
                 print_char('\n');
+                found +=1;
             }
             if (containVerWrap(grid + grid_idx, word, len_row, len_cols)) {
                 print_int(rowCount);
@@ -255,6 +260,8 @@ void strfind() {
                 print_char(' ');
                 print_word(word);
                 print_char('\n');
+                found +=1;
+
             }
             if (containDiagWrap(grid + grid_idx, word, len_row, len_cols)) {
                 print_int(rowCount);
@@ -265,12 +272,15 @@ void strfind() {
                 print_char(' ');
                 print_word(word);
                 print_char('\n');
+                found +=1;
             }
         }
         grid_idx++;
-        if (stringlen(grid) == grid_idx) return;
     }
-    print_string("-1\n");
+    if (found == 0) {
+        print_string("-1\n");
+    }
+    
 }
 
 

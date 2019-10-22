@@ -74,9 +74,8 @@ void print_word(char *word) {
 // function to see if the string contains the (\n terminated) word
 int contain(char *string, char *word) {
     while (1) {
-        if (*string == '\n') {
-            string++;
-            continue;
+        if (*string == '\n' && *word != '\n') {
+            return 0;
         }
         if (*string != *word) {
             return (*word == '\n');
@@ -107,10 +106,20 @@ int lenRows(char *string) {
     return len;
 }
 
-int containCol(char *string, char *word, int len_row) {
+int containCol(char *string, char *word, int len_row, int len_cols) {
     while (1) {
-        if (*string != *word) {
-            return (*word == '\n');
+        int pos = string -grid;
+        int x = pos / (len_row+1) ;
+        int y = pos % (len_row+1) ;
+
+        if (*word == '\n') {
+            return 1;
+        }
+        if (*string == '\n' || *string != *word) {
+            return 0;
+        }
+        if (x == len_cols) {
+            return 0;
         }
         string = string + len_row + 1;
         word++;
@@ -119,13 +128,21 @@ int containCol(char *string, char *word, int len_row) {
     return 0;
 }
 
-int containDiag(char *string, char *word, int len_row)
+int containDiag(char *string, char *word, int len_row, int len_cols)
 {
     while (1)
     {
-        if (*string != *word)
-        {
-            return (*word == '\n');
+        int pos = string -grid;
+        int x = pos / (len_row+1) ;
+        int y = pos % (len_row+1) ;
+        if (*word == '\n') {
+            return 1;
+        }
+        if (*string == '\n' || *string != *word) {
+            return 0;
+        }
+        if (x == len_cols) {
+            return 0;
         }
         string = string + len_row + 2;
         word++;
@@ -161,13 +178,16 @@ void strfind() {
     int rowCount = 0;
     char *word;
     int len_row = lenRows(grid);
+    int len_cols = countrows(grid);
+    int found = 0;
+
     while (grid[grid_idx] != '\0') {
         if (grid[grid_idx] == '\n') {
             ++rowCount;
         }
         for (idx = 0; idx < dict_num_words; idx++) {
             word = dictionary + dictionary_idx[idx];
-            if (containCol(grid + grid_idx, word, len_row))
+            if (containCol(grid + grid_idx, word, len_row, len_cols))
             {
                 print_int(rowCount);
                 print_char(',');
@@ -177,8 +197,10 @@ void strfind() {
                 print_char(' ');
                 print_word(word);
                 print_char('\n');
+                found +=1;
+
             }
-            if (containDiag(grid + grid_idx, word, len_row))
+            if (containDiag(grid + grid_idx, word, len_row, len_cols))
             {
                 print_int(rowCount);
                 print_char(',');
@@ -188,6 +210,7 @@ void strfind() {
                 print_char(' ');
                 print_word(word);
                 print_char('\n');
+                found +=1;
             }
             if (contain(grid + grid_idx, word))
             {
@@ -199,12 +222,15 @@ void strfind() {
                 print_char(' ');
                 print_word(word);
                 print_char('\n');
+                found +=1;
             }
         }
         grid_idx++;
-        if (stringlen(grid) == grid_idx) return;
     }
-    print_string("-1\n");
+    if (found == 0) {
+        print_string("-1\n");
+    }
+    
 }
 
 //---------------------------------------------------------------------------

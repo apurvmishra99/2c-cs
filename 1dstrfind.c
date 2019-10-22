@@ -101,6 +101,7 @@ void strfind()
   int idx = 0;
   int grid_idx = 0;
   char *word;
+  int found = 0;
   while (grid[grid_idx] != '\0')
   {
     for (idx = 0; idx < dict_num_words; idx++)
@@ -112,13 +113,14 @@ void strfind()
         print_char(' ');
         print_word(word);
         print_char('\n');
+        found += 1;
       }
     }
     grid_idx++;
-    if (stringlen(grid) == grid_idx)
-      return;
   }
-  print_string("-1\n");
+  if (found == 0) {
+    print_string("-1\n");
+  }
 }
 
 //---------------------------------------------------------------------------
