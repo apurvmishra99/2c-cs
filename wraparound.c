@@ -87,14 +87,6 @@ int contain(char *string, char *word) {
     return 0;
 }
 
-int stringlen(char *string) {
-    int len = 0;
-    while (*string != '\0') {
-        len++;
-        string++;
-    }
-    return len;
-}
 
 int countrows(char *string) {
     int count = 0;
