@@ -21,8 +21,8 @@
 grid_file_name:         .asciiz  "1dgrid.txt"
 dictionary_file_name:   .asciiz  "dictionary.txt"
 newline:                .asciiz  "\n"
-no_match: 		.asciiz  "-1\n"
-space: 			.asciiz  " "
+no_match: 				.asciiz  "-1\n"
+space: 					.asciiz  " "
 #-------------------------------------------------------------------------
 # Global variables in memory
 #-------------------------------------------------------------------------

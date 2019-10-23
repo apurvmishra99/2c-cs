@@ -166,11 +166,11 @@ int containDiagWrap(char *string, char *word, int len_row, int len_cols)
         }
         else if (x == len_cols || y == len_row)
         {
-            string -= (x * (len_row + 2));
-            if (*string == '\n')
-            { //stops the infinite loop
-                return 0;
-            }
+        	if(*string == '\n')
+        	{
+        		return 0;
+        	}
+        	string -= (len_row+2); 
         }
         else if (*string != *word)
         {
