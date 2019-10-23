@@ -128,8 +128,8 @@ int containCol(char *string, char *word, int len_row, int len_cols)
 {
     while (1)
     {
-        int grid_idx = string - grid;
-        int x = grid_idx / (len_row + 1);
+        int pos = string - grid;
+        int x = pos / (len_row + 1);
 
         if (*word == '\n')
         {
@@ -157,8 +157,8 @@ int containDiag(char *string, char *word, int len_row, int len_cols)
 {
     while (1)
     {
-        int grid_idx = string - grid;
-        int x = grid_idx / (len_row + 1);
+        int pos = string - grid;
+        int x = pos / (len_row + 1);
 
         if (*word == '\n')
         {
