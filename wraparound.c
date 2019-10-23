@@ -106,9 +106,9 @@ int containHorWrap(char *string, char *word, int len_row)
         {
             return 1;
         }
-        if (*string == '\n')
+        else if (*string == '\n')
         {
-            string -= (len_row); // go back to first element
+            string -= (len_row);
         }
         else if (*string != *word)
         {
@@ -167,7 +167,8 @@ int containDiagWrap(char *string, char *word, int len_row, int len_cols)
         else if (x == len_cols || y == len_row)
         {
             string -= (x * (len_row + 2));
-            if (*string == '\n') { //stops the infinite loop
+            if (*string == '\n')
+            { //stops the infinite loop
                 return 0;
             }
         }
@@ -336,7 +337,7 @@ int main(void)
     } while (1);
 
     dict_num_words = dict_idx;
-    
+
     strfind();
 
     return 0;

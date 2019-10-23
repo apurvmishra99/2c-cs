@@ -201,16 +201,17 @@ print_word:                             # while loop
 finish:
         jr $ra                          # back to $ra
 
-#-------------------------------------------------
+#-----------------------------------------------------------------------------------------------#
 
 strfind:
-	lw   $s0, dict_num_words	 # s0 = dict_num_words
+		lw   $s0, dict_num_words	 	 # s0 = dict_num_words
         li   $s2, 0                      # grid_idx = 0
+        li	 $s4, 0						 # words_found = 0
         j    while_loop              	 # go to while loop
 
 while_loop:
         lb   $t0, grid($s2)              # $t0 = grid[grid_idx]
-        li   $s1, 0			 # idx = 0
+        li   $s1, 0			 			 # idx = 0
         beq  $t0, $zero, while_end       # while(grid[grid_idx] =/= '\0')
 
 for_loop:
@@ -222,7 +223,6 @@ for_loop:
         la   $t0, grid
         add  $a0, $t0, $s2               # string = grid + grid_idx
 
-        move $s6, $a0 
         move $a1, $s3                    # $a1 = word
 
         addi $sp, $sp, -4
@@ -232,21 +232,21 @@ for_loop:
         addi $sp, $sp, 4
 
         beqz $v0, word_not_found         # if (!contain) go back to while loop
-        li   $s4, 1                      # found = 1
+        addi $s4, $s4, 1                 # words_found += 1
         li   $v0, 1                      # set syscall for print int
-        move $a0, $s2                    # print(grid_idx at $s2)
+        move $a0, $s2                    # print_int($s2) ; s2 = grid_idx
         syscall
+        
         li   $v0, 11                     # set syscall for print char
         lb   $a0, space                  # print space
         syscall
+        
         move $a0, $s3                    # $a0 = $s3
-
-        addi $sp, $sp, -4
+        addi $sp, $sp, -4				 # stack manipulation
         sw   $ra, 0($sp)
         jal print_word                   # print_word($a0 = $s3)
         lw   $ra, 0($sp)
         addi $sp, $sp, 4
-
         li   $v0, 11                     # set syscall for print char
         lb   $a0, newline                # print newline '\n'
         syscall
@@ -270,4 +270,4 @@ while_end:
         addi $sp, $sp, 4
 
 words_found:
-	jr $ra
+		jr $ra
