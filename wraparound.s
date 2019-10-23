@@ -235,7 +235,7 @@ containVerWrap:
         beq  $t1, $t2, return_1			# if *word == "\n" then return 1
         beq  $t0, $t2, return_0			# if *string == "\n" then return 0, else keeps going to \n's
         bne  $t8, $t4, char_comparision_ver # if col_num == col_length then return 0
-        add  $t0, $t9, $t8				# t0 = t9 + t8 = grid + col_num
+        add  $a0, $t9, $t8				# a0 = t9 + t8 = grid + col_num
         j 	 containVerWrap				# loop back
         
 char_comparision_ver:
@@ -245,6 +245,27 @@ char_comparision_ver:
         j    containVerWrap             # loop again
 
 containDiagWrap:                                
+#        lb   $t0, 0($a0)                # $t0 = string[0]
+ #       lb   $t1, 0($a1)                # $t1 = word[0]
+  #      lw   $t3, row_length			# t3 = row_length
+   #     lw   $t4, col_length			# t4 = col_length
+    #    la   $t9, grid					# t9 = grid
+    #    sub  $t6, $t0, $t9				# t6 = pos = string - grid
+    #    div  $t7, $t6, $t3		        # t7 = row_num = pos / row_len
+    #    rem  $t8, $t6, $t3				# t8 = col_num = pos % row_len
+    #    lb	 $t2, newline				# $t2 = "\n"
+     #   
+     #   beq  $t1, $t2, return_1			# if *word == "\n" then return 1
+        
+      #  sub  $t3, $t3, 1				# t3 = row_length -1
+       # bne  $t3, $t8, char_comparision_diag # if col_num == row_length-1 go to char comp
+       # bne  $t4, $t7, char_comparision_diag # if row_num == col_num go to char comp
+        
+       # addi $t3, $t3, 2				# t3 = row_length + 1 
+	#	mul  $t3, $t7, $t3		
+	##	sub  $a0, $t0, $t3         		# string -= (row_length+1)
+      ##  beq  $t0, $t2, return_0			# if *string == "\n" return 0
+        #j containDiagWrap
         lb   $t0, 0($a0)                # $t0 = string[0]
         lb   $t1, 0($a1)                # $t1 = word[0]
         lw   $t3, row_length			# t3 = row_length
@@ -256,21 +277,19 @@ containDiagWrap:
         lb	 $t2, newline				# $t2 = "\n"
         
         beq  $t1, $t2, return_1			# if *word == "\n" then return 1
-        
-        sub  $t3, $t3, 1				# t3 = row_length -1
-        bne  $t3, $t8, char_comparision_diag # if col_num == row_length-1 go to char comp
-        bne  $t4, $t7, char_comparision_diag # if row_num == col_num go to char comp
-        beq  $t0, $t2, return_0			# if *string == "\n" return 0
-        addi $t3, $t3, 2				# t3 = row_length + 1 
-		sub  $t0, $t0, $t3         		# string -= (row_length+1)
-        j containDiagWrap
-        
-char_comparision_diag:
-		bne  $t0, $t1, return_0			# if (*string != *word) then return 0
-		addi $t3, $t3, 1				# row_len += 1
+        beq  $t0, $t2, return_0			# if *string == "\n" then return 0
+        beq  $t8, $t4, return_0			# if col_num == col_length then return 0
+        bne  $t0, $t1, return_0  		# if (*string != *word) then return 0
+        addi $t3, $t3, 1				# row_len += 1
         add  $a0, $a0, $t3              # string+= (row_length+1)
         addi $a1, $a1, 1                # word++
-        j    containDiagWrap            # loop again
+        j    containDiagWrap                 # loop again       
+#char_comparision_diag:
+#		bne  $t0, $t1, return_0			# if (*string != *word) then return 0
+#		addi $t3, $t3, 1				# row_len += 1
+ #       add  $a0, $a0, $t3              # string+= (row_length+1)
+  #      addi $a1, $a1, 1                # word++
+   #     j    containDiagWrap            # loop again
 
 print_word:                             # while loop
         move $t0, $a0                   # $t0 = (char*[])word
