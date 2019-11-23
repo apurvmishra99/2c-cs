@@ -1,0 +1,10 @@
+0,2 V have
+0,4 V eden
+0,5 H not
+0,5 V not
+1,7 D ear
+2,11 H thing
+2,16 H have
+2,16 D have
+3,3 V not
+3,8 H area
