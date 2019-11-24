@@ -16,6 +16,9 @@ char reg_init_path[1000];
 uint32_t cache_size = 0;
 struct architectural_state arch_state;
 
+#define I_TYPE 2
+#define J_TYPE 3
+
 static inline uint8_t get_instruction_type(int opcode)
 {
     switch (opcode) {
@@ -25,10 +28,25 @@ static inline uint8_t get_instruction_type(int opcode)
             return R_TYPE;
         case EOP:
             return EOP_TYPE;
+        case ADDI:
+            return I_TYPE;
+        case LW:
+            return I_TYPE;
+        case SW:
+            return I_TYPE;
+        case BEQ:
+            return I_TYPE;
+        case J:
+            return J_TYPE;
+        case SLT:
+            return I_TYPE;
+        case ADD:
+            return;
 
         ///@students: fill in the rest
 
         default:
+            printf("Opcode not found %u .\n", opcode);
             assert(false);
     }
     assert(false);
@@ -61,9 +79,29 @@ void FSM()
             control->ALUSrcA = 0;
             control->ALUSrcB = 3;
             control->ALUOp = 0;
-            if (IR_meta->type == R_TYPE) state = EXEC;
-            else if (opcode == EOP) state = EXIT_STATE;
-            else assert(false);
+            if (IR_meta->type == R_TYPE) 
+            {
+                state = EXEC;
+            }
+            else if (IR_meta->type == J_TYPE)
+            {
+                state = JUMP_COMPL;
+            }
+            else if (opcode == BEQ) 
+            {
+                state = BRANCH_COMPL;
+            }
+            else if (IR_meta->type == I_TYPE)
+            {
+                state = MEM_ADDR_COMP;
+            }
+            else if (opcode == EOP) 
+            {
+                state = EXIT_STATE;
+            }
+            else {
+                printf("Instruction could not be decoded, opcode: %u, type: %u .\n", opcode, IR_meta->type);
+            }
             break;
         case EXEC:
             control->ALUSrcA = 1;
@@ -77,7 +115,65 @@ void FSM()
             control->MemtoReg = 0;
             state = INSTR_FETCH;
             break;
-        default: assert(false);
+        case MEM_ADDR_COMP:
+            control->ALUSrcA = 1;
+            control->ALUSrcB = 2;
+            control->ALUOp = 0;
+            switch(opcode) {
+                case LW:
+                    state = MEM_ACCESS_LD;
+                    break;
+                case SW:
+                    state = MEM_ACCESS_ST;
+                    break;
+                case ADDI:
+                    state = I_TYPE_COMPL;
+                    break;
+                default:
+                    printf("Unknown opcode: %u in I_TYPE instruction\n", opcode);
+                    assert(false);
+            }
+            break;
+        case MEM_ACCESS_LD:
+            control->MemRead = 1;
+            control->IorD = 1;
+            state =WB_STEP;
+            break;
+        case MEM_ACCESS_ST:
+            control->MemWrite = 1;
+            control->IorD = 1;
+            state = INSTR_FETCH;
+            break;
+        case BRANCH_COMPL:
+            control->ALUSrcA = 1;
+            control->ALUSrcB = 0;
+            control->ALUOp = 1;
+            control->PCWriteCond = 1;
+            control->PCSource = 1;
+            state = INSTR_FETCH;
+            break;
+        case JUMP_COMPL:
+            control->PCWrite = 1;
+            control->PCSource = 2;
+            state = INSTR_FETCH;
+            break;
+        case EXIT_STATE:
+            break;
+        case I_TYPE_COMPL:
+            control->RegDst = 0;
+            control->RegWrite = 1;
+            control->MemtoReg = 0;
+            state = INSTR_FETCH;
+            break;
+        case WB_STEP:
+            control->RegDst = 0;
+            control->RegWrite = 1;
+            control->MemtoReg = 1;
+            state = INSTR_FETCH;
+            break;
+        default:
+            printf("FSM state: %u not found.\n", state); 
+            assert(false);
     }
     arch_state.state = state;
 }
@@ -119,6 +215,9 @@ void execute()
         case 1:
             alu_opB = WORD_SIZE;
             break;
+        case 2:
+            alu_opB = immediate;
+            break;
         case 3:
             alu_opB = shifted_immediate;
             break;
@@ -131,9 +230,18 @@ void execute()
         case 0:
             next_pipe_regs->ALUOut = alu_opA + alu_opB;
             break;
+        case 1:
+            curr_pipe_regs->ALUOut = alu_opA - alu_opB;
+            break;
         case 2:
             if (IR_meta->function == ADD)
+            {
                 next_pipe_regs->ALUOut = alu_opA + alu_opB;
+            }
+            else if (IR_meta->function == SLT)
+            {
+                next_pipe_regs->ALUOut = alu_opA < alu_opB;
+            }
             else
                 assert(false);
             break;
@@ -146,7 +254,20 @@ void execute()
         case 0:
             next_pipe_regs->pc = next_pipe_regs->ALUOut;
             break;
+        case 1:
+            // Branch: if (A == B) PC = ALUOut
+            if (alu_opA == alu_opB)
+            {
+                next_pipe_regs->pc = next_pipe_regs->ALUOut;
+                printf("New PC = %u \n", next_pipe_regs->pc);
+            }
+            break;          
+        case 2:
+            // Jump: PC = PC [31-28] || (IR[25-0] <<2)
+            next_pipe_regs->pc = (curr_pipe_regs->pc & 0xf0000000) | (arch_state.IR_meta.jmp_offset << 2);
+            break;
         default:
+            printf("Unresolved PCSOURCE: %u .\n", control->PCSource);
             assert(false);
     }
 }
@@ -154,15 +275,45 @@ void execute()
 
 void memory_access() {
   ///@students: appropriate calls to functions defined in memory_hierarchy.c must be added
+    if (arch_state.control.MemRead && arch_state.control.IorD)
+    {
+        // MDR = Memory[ALUOut]
+        arch_state.next_pipe_regs.MDR = memory_read(arch_state.curr_pipe_regs.ALUOut);
+    }
+    else if (arch_state.control.MemWrite)
+    {
+        // Memory [ALUOut] = B
+        memory_write(arch_state.curr_pipe_regs.ALUOut, arch_state.curr_pipe_regs.B);
+    }
 }
 
 void write_back()
 {
     if (arch_state.control.RegWrite) {
-        int write_reg_id =  arch_state.IR_meta.reg_11_15;
+        int write_reg_id;
+        
+        if (arch_state.control.RegDst)
+        {
+            write_reg_id = arch_state.IR_meta.reg_11_15;
+        }
+        else
+        {
+            write_reg_id = arch_state.IR_meta.reg_16_20;
+        }
         check_is_valid_reg_id(write_reg_id);
-        int write_data =  arch_state.curr_pipe_regs.ALUOut;
+        
+        int write_data;
+        if (arch_state.control.MemtoReg)
+        {
+            write_data = arch_state.curr_pipe_regs.MDR;
+        }
+        else
+        {
+            write_data = arch_state.curr_pipe_regs.ALUOut;
+        }
+        
         if (write_reg_id > 0) {
+            // Reg[IR["bit range"]] = MDR
             arch_state.registers[write_reg_id] = write_data;
             //printf("Reg $%u = %d \n", write_reg_id, write_data);
         } else printf("Attempting to write reg_0. That is likely a mistake \n");
@@ -184,9 +335,36 @@ void set_up_IR_meta(int IR, struct instr_meta *IR_meta)
     switch (IR_meta->opcode) {
         case SPECIAL:
             if (IR_meta->function == ADD)
+            {
                 printf("Executing ADD(%d), $%u = $%u + $%u (function: %u) \n",
                        IR_meta->opcode,  IR_meta->reg_11_15, IR_meta->reg_21_25,  IR_meta->reg_16_20, IR_meta->function);
+            }
+            else if (IR_meta->function == SLT)
+            {
+                printf("Executing SLT(%d), $%u = $%u < $%u (function: %u) \n",
+                       IR_meta->opcode,  IR_meta->reg_11_15, IR_meta->reg_21_25,  IR_meta->reg_16_20, IR_meta->function);
+            }
             else assert(false);
+            break;
+        case ADDI:
+            printf("Executing ADDI(%d), $%u = $%u + $%d (function: %u) \n",
+                       IR_meta->opcode,  IR_meta->reg_16_20, IR_meta->reg_21_25,  IR_meta->immediate, IR_meta->function);
+            break;
+        case J:
+            printf("Executing J(%d), $JOff = $%u (function: %u) \n",
+                       IR_meta->opcode,  IR_meta->jmp_offset, IR_meta->function);
+            break;
+        case SW:
+            printf("Executing SW(%d), mem[$%u +%d] = $%u (function: %u) \n",
+                       IR_meta->opcode, IR_meta->reg_21_25, IR_meta->immediate, IR_meta->reg_16_20, IR_meta->function);
+            break;
+        case LW:
+            printf("Executing LW(%d), $%u = mem[$%u + %d] (function: %u) \n",
+                       IR_meta->opcode,  IR_meta->reg_16_20, IR_meta->reg_21_25,  IR_meta->immediate, IR_meta->function);
+            break;
+        case BEQ:
+            printf("Executing BEQ(%d), if $%u == $%u: jump + %d (function: %u) \n",
+                       IR_meta->opcode,  IR_meta->reg_16_20, IR_meta->reg_21_25,  IR_meta->immediate, IR_meta->function);
             break;
         case EOP:
             printf("Executing EOP(%d) \n", IR_meta->opcode);
@@ -206,6 +384,11 @@ void assign_pipeline_registers_for_the_next_cycle()
         curr_pipe_regs->IR = next_pipe_regs->IR;
         printf("PC %d: ", curr_pipe_regs->pc / 4);
         set_up_IR_meta(curr_pipe_regs->IR, IR_meta);
+    }
+    if (control->PCWrite || (control->PCWriteCond && curr_pipe_regs->ALUOut == 0))
+    {
+        check_address_is_word_aligned(next_pipe_regs->pc);
+        curr_pipe_regs->pc = next_pipe_regs->pc;
     }
     curr_pipe_regs->ALUOut = next_pipe_regs->ALUOut;
     curr_pipe_regs->A = next_pipe_regs->A;
