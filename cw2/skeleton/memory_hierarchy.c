@@ -127,15 +127,15 @@ void memory_write(int address, int write_data)
         int byte_offset = get_piece_of_a_word(address, 0, OFFSET_BITS) / 4;
         int index_bits = get_piece_of_a_word(address, OFFSET_BITS, INDEX_BITS);
         int tag = get_piece_of_a_word(address, (OFFSET_BITS + INDEX_BITS), TAG_BITS);
-
+        int addr = 0xFFFFFFF0 & address;
         if (SYS_CACHE[index_bits].valid == 1 && SYS_CACHE[index_bits].tag == tag)
         {
             arch_state.mem_stats.sw_cache_hits += 1;
             arch_state.memory[address / 4] = (uint32_t)write_data;
-            // for(int i = 0; i < CACHE_BLOCK_SIZE; i++) {
-            //     SYS_CACHE[index_bits].data[i] = (int) arch_state.memory[(addr/4) + i];
-            // }
-            SYS_CACHE[index_bits].data[byte_offset] = (uint32_t)write_data;
+            for(int i = 0; i < CACHE_BLOCK_SIZE; i++) {
+                SYS_CACHE[index_bits].data[i] = (int) arch_state.memory[(addr/4) + i];
+            }
+            // SYS_CACHE[index_bits].data[byte_offset] = (uint32_t)write_data;
         }
         else
         {
