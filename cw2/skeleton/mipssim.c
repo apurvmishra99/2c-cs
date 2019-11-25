@@ -40,9 +40,6 @@ static inline uint8_t get_instruction_type(int opcode)
             return J_TYPE;
         case SLT:
             return I_TYPE;
-        case ADD:
-            return;
-
         ///@students: fill in the rest
 
         default:
